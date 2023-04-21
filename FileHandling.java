@@ -1,14 +1,9 @@
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.io.File;  // Import the File class
-import java.io.FileNotFoundException;  // Import this class to handle errors
-import java.io.FileReader;
-import java.util.Scanner; // Import the Scanner class to read text files
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.PrintWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,42 +11,43 @@ import java.util.List;
 // Classe remota para o exemplo "Hello, world!"
 public class FileHandling extends UnicastRemoteObject implements FileHandlingInterface {
     private static final long serialVersionUID = 7896795898928782846L;
-    private String message;
-
-    // Constroi um objeto remoto armazenando nele o String recebido
-    public FileHandling (String msg) throws RemoteException {
-        message = msg;
-    }
+    public FileHandling () throws RemoteException {}
 
     // Implementa o metodo invocavel remotamente, que retorna a mensagem armazenada no objeto
     public String read() throws RemoteException {
-        readFile();
-        return "test";
+        System.out.println("Reading from file file...");
+        try {
+            return readFileAsString("test");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
     }
 
     public boolean write(String message) {
-        try {
-            File f1 = new File("filename.txt");
-            FileWriter fileWritter = new FileWriter(f1.getName(),true);
-            BufferedWriter bw = new BufferedWriter(fileWritter);
-            bw.write("\n");
-            bw.write(message);
-            bw.close();
-            System.out.println("Done");
-        } catch(IOException e){
+        System.out.println("Writing to file...");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("filename.txt", true))) {
+            writer.write(message);
+            writer.newLine();
+            return true;
+        } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
-        return true;
     }
 
     public boolean delete(int numeroLinha){
+        System.out.println("Deleting from file...");
         List<String> linhas = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader("filename.txt"))) {
+            Thread.sleep(1000);
             String linha;
             while ((linha = br.readLine()) != null) {
                 linhas.add(linha);
             }
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -71,19 +67,9 @@ public class FileHandling extends UnicastRemoteObject implements FileHandlingInt
         return true;
     }
 
-    private void readFile() {
-        try {
-            File myObj = new File("filename.txt");
-            Scanner myReader = new Scanner(myObj);
-            while (myReader.hasNextLine()) {
-                String data = myReader.nextLine();
-                System.out.println(data);
-            }
-            myReader.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
+    public String readFileAsString(String filePath) throws IOException {
+        byte[] encodedBytes = Files.readAllBytes(Paths.get("filename.txt"));
+        return new String(encodedBytes, StandardCharsets.UTF_8);
     }
 }
 

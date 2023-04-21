@@ -1,6 +1,5 @@
 Linha 4
 Linha 5
-Linha 6
-Teste1
-Teste2
-Teste3
+Linha 6ADDED LINE
+ADDED LINE
+ADDED LINE

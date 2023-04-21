@@ -18,8 +18,11 @@ public class FileHandlingClientThread extends Thread {
 
 		try {
 			FileHandlingInterface fileHandling = (FileHandlingInterface) Naming.lookup (connectLocation);
+			System.out.println("Content read from file:");
 			System.out.println (fileHandling.read());
-			System.out.println (fileHandling.write("Teste"));
+			System.out.println("Adding new line to file");
+			System.out.println (fileHandling.write("ADDED LINE"));
+			System.out.println("Deleting line from file");
 			System.out.println (fileHandling.delete(1));
 		} catch (Exception e) {
 			System.out.println ("HelloClient failed:");

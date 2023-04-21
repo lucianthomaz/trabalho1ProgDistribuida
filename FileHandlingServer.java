@@ -19,7 +19,7 @@ class FileHandlingServer {
 		}
 		try {
 			String server = "rmi://" + args[0] + ":1099/FileHandling";
-			Naming.rebind (server, new FileHandling("Hello, World!"));
+			Naming.rebind (server, new FileHandling());
 			System.out.println ("HelloServer is ready.");
 		} catch (Exception e) {
 			System.out.println ("HelloServer failed:");
