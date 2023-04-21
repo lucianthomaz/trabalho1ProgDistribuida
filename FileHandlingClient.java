@@ -13,6 +13,8 @@ class FileHandlingClient {
 		try {
 			FileHandlingInterface fileHandling = (FileHandlingInterface) Naming.lookup (connectLocation);
 			System.out.println (fileHandling.read());
+			System.out.println (fileHandling.write("Teste"));
+			System.out.println (fileHandling.delete(1));
 		} catch (Exception e) {
 			System.out.println ("HelloClient failed:");
 			e.printStackTrace();
