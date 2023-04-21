@@ -1,5 +1,6 @@
 all:			FileHandlingClient.class FileHandlingServer.class \
-			FileHandling.class FileHandlingInterface.class
+			FileHandling.class FileHandlingInterface.class \
+			FileHandlingClientThread.class
 
 FileHandling.class:		FileHandling.java FileHandlingInterface.class
 			@javac FileHandling.java
@@ -12,6 +13,9 @@ FileHandlingClient.class:	FileHandlingClient.java
 
 FileHandlingServer.class:	FileHandlingServer.java
 			@javac FileHandlingServer.java
+
+FileHandlingClientThread.class:	FileHandlingClientThread.java
+			@javac FileHandlingClientThread.java				
 
 run:			all
 			@java FileHandlingServer &

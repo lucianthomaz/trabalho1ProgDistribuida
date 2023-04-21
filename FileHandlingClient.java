@@ -1,4 +1,7 @@
 import java.rmi.Naming;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.util.*;
 
 class FileHandlingClient {
 	// Programa cliente para o exemplo "Hello, world!"
@@ -8,17 +11,9 @@ class FileHandlingClient {
 			System.exit(1);
 		}
 
-		String connectLocation = "rmi://" + args[0] + ":1099/FileHandling";
-
-		try {
-			FileHandlingInterface fileHandling = (FileHandlingInterface) Naming.lookup (connectLocation);
-			System.out.println (fileHandling.read());
-			System.out.println (fileHandling.write("Teste"));
-			System.out.println (fileHandling.delete(1));
-		} catch (Exception e) {
-			System.out.println ("HelloClient failed:");
-			e.printStackTrace();
-		}
+		new FileHandlingClientThread(args, "t1").run();
+		new FileHandlingClientThread(args, "t2").run();
+		new FileHandlingClientThread(args, "t3").run();
 	}
 }
 
