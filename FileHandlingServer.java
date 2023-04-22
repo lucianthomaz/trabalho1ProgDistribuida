@@ -17,10 +17,11 @@ class FileHandlingServer extends UnicastRemoteObject implements FileHandlingInte
 	private String serverName;
 	private static final String FILE_LOCATION = "fileLocation.txt";
 	private static final boolean IS_LOCALHOST_TESTING = true;
-	private boolean isMasterServer = false;
+	private boolean isMasterServer;
 	private boolean isLocked = false;
 	private FileHandlingInterface remoteServer;
-	private static final int TIME_TO_WAIT_IN_MILLIS = 2000;
+	private static final int TIME_TO_WAIT_IN_MILLIS = 1000;
+	private static final int TIME_TO_LOCK_IN_MILLIS = 3000;
 	private String lockedBy;
 
 	protected FileHandlingServer(String serverName, boolean isMasterServer) throws RemoteException {
@@ -32,12 +33,17 @@ class FileHandlingServer extends UnicastRemoteObject implements FileHandlingInte
 	}
 
 	public static void main(String[] args) {
-		bootUpEnvironment();
+		if (args.length != 3) {
+			System.out.println("Usage: java FileHandlingClient <ip> <port> <true,false(isMasterServer)>");
+			System.exit(1);
+		}
+		bootUpEnvironment(args);
 	}
 
-	private static void bootUpEnvironment() {
-			initMasterServer();
-			initOtherServers();
+	private static void bootUpEnvironment(String[] args) {
+		initServerManually(args[0], Integer.parseInt(args[1]), Boolean.parseBoolean(args[2]));
+//			initMasterServer();
+//			initOtherServers();
 	}
 
 	private static List<String> readFileToList(String filePath) throws Exception {
@@ -49,23 +55,32 @@ class FileHandlingServer extends UnicastRemoteObject implements FileHandlingInte
 	public String read() throws RemoteException {
 		System.out.println("[server " + serverName + " ] Reading from file file...");
 		try {
+			Thread.sleep(TIME_TO_LOCK_IN_MILLIS);
 			return IS_LOCALHOST_TESTING ? readFileAsString() : readRemoteFile(serverName, getRemoteFileLocation());
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
 			return e.getMessage();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return "";
 		}
 	}
 
 	public boolean write(String message) {
 		while (!lock(serverName)) {
 			System.out.println("Cannot write because resource already locked! Will try again in " + TIME_TO_WAIT_IN_MILLIS + " milliseconds");
+			try {
+				Thread.sleep(TIME_TO_WAIT_IN_MILLIS);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		System.out.println("[server " + serverName + " ] Writing to file...");
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(SHARED_FILE, true))) {
-			Thread.sleep(TIME_TO_WAIT_IN_MILLIS);
-			writer.write(message);
+			Thread.sleep(TIME_TO_LOCK_IN_MILLIS);
 			writer.newLine();
+			writer.write(message);
 			unlock(serverName);
 			return true;
 		} catch (IOException e) {
@@ -81,11 +96,16 @@ class FileHandlingServer extends UnicastRemoteObject implements FileHandlingInte
 	public boolean delete(int numeroLinha) {
 		while (!lock(serverName)) {
 			System.out.println("Cannot delete because resource already locked! Will try again in " + TIME_TO_WAIT_IN_MILLIS + " milliseconds");
+			try {
+				Thread.sleep(TIME_TO_WAIT_IN_MILLIS);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		System.out.println("[server " + serverName + " ] Deleting from file...");
 		List<String> linhas = new ArrayList<>();
 		try (BufferedReader br = new BufferedReader(new FileReader(SHARED_FILE))) {
-			Thread.sleep(TIME_TO_WAIT_IN_MILLIS);
+			Thread.sleep(TIME_TO_LOCK_IN_MILLIS);
 			String linha;
 			while ((linha = br.readLine()) != null) {
 				linhas.add(linha);
@@ -207,6 +227,22 @@ class FileHandlingServer extends UnicastRemoteObject implements FileHandlingInte
 		return null;
 	}
 
+	private static void initServerManually(String ip, int port, boolean isMasterServer) {
+		String server = "rmi://" + ip + ":" + port + "/FileHandling";
+		try {
+			System.setProperty("java.rmi.server.hostname", ip);
+			LocateRegistry.createRegistry(port);
+			Naming.rebind(server, new FileHandlingServer(server, isMasterServer));
+			System.out.println(ip + ":" + port + " is ready.");
+		}catch (RemoteException e) {
+			System.out.println("RMI registry already running.");
+		}
+		catch (Exception e) {
+			System.out.println("An ERROR occurred while trying to INIT SERVER MANUALLY");
+			e.printStackTrace();
+		}
+	}
+
 	private static void initMasterServer() {
 		String server = "rmi://" + getMasterAddress() + "/FileHandling";
 		System.out.println("Trying to init master at: " + server);
@@ -216,6 +252,7 @@ class FileHandlingServer extends UnicastRemoteObject implements FileHandlingInte
 			System.setProperty("java.rmi.server.hostname", ip);
 			LocateRegistry.createRegistry(port);
 			Naming.rebind(server, new FileHandlingServer(server, true));
+			System.out.println(ip + ":" + port + " is ready.");
 		}catch (RemoteException e) {
 			System.out.println("RMI registry already running.");
 		}

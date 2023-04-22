@@ -1,5 +1,5 @@
-localhost,2000,false
+localhost,2000,true
 localhost,2001,false
-localhost,2002,true
+localhost,2002,false
 localhost,2003,false
 localhost,2004,false

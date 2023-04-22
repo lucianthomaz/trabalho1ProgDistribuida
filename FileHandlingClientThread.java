@@ -1,66 +1,88 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class FileHandlingClientThread extends Thread {
-    protected String[] thread_args;
-    protected String thread_name;
-    private static final String SERVER_LIST_PATH = "serverList.txt";
-    private static final String FILE_LOCATION = "fileLocation.txt";
+    protected String connectLocation;
+    private int amountOfReads;
+    private int amountOfWrites;
+    private int amountOfDeletes;
+    private static final String AMOUNT_OF_EACH_OPERATION_PATH = "amountOfEachOperation.txt";
 
-    public FileHandlingClientThread(String[] args, String name) {
-        thread_args = args;
-        thread_name = name;
+    public FileHandlingClientThread(String connectLocation) {
+        this.connectLocation = connectLocation;
     }
 
     public void run() {
-        String connectLocation = getConnectLocationForRandomServer();
-
+        readAmountOfEachOperation(AMOUNT_OF_EACH_OPERATION_PATH);
         try {
-            FileHandlingInterface fileHandling = (FileHandlingInterface) Naming.lookup(connectLocation);
-            System.out.println("Content read from file:");
-            System.out.println(fileHandling.read());
-            System.out.println("Adding new line to file");
-            System.out.println(fileHandling.write("ADDED LINE"));
-            System.out.println("Deleting line from file");
-            System.out.println(fileHandling.delete(1));
-        } catch (Exception e) {
-            System.out.println("HelloClient failed:");
-            e.printStackTrace();
-        }
-    }
-
-    private String getConnectLocationForRandomServer() {
-        try {
-            List<String> availableServers = readFileToList(SERVER_LIST_PATH); // Lista dos servers disponíveis
             Random rand = new Random();
-            int randomServer = rand.nextInt(5);// Random pra escolher um server aleatório
-            String[] details = availableServers.get(randomServer).split(",");
-            String ip = details[0];
-            int port = Integer.parseInt(details[1]);
-            return "rmi://" + ip + ":" + port + "/FileHandling";
+            FileHandlingInterface fileHandling = (FileHandlingInterface) Naming.lookup(connectLocation);
+            while (amountOfReads > 0 || amountOfWrites > 0 || amountOfDeletes > 0) {
+                System.out.println("Amount of reads remaining: " + amountOfReads);
+                System.out.println("Amount of writes remaining: " + amountOfWrites);
+                System.out.println("Amount of deletes remaining: " + amountOfDeletes);
+                int randomOperation = rand.nextInt(3);
+                switch (randomOperation) {
+                    case 0:
+                        if (amountOfReads > 0)
+                            readFromFile(fileHandling);
+                        break;
+                    case 1:
+                        if (amountOfWrites > 0)
+                            writeToFile(fileHandling);
+                        break;
+                    case 2:
+                        if (amountOfDeletes > 0)
+                            deleteFromFile(fileHandling);
+                        break;
+                }
+            }
         } catch (Exception e) {
+            System.out.println("FileHandlingServer failed:");
             e.printStackTrace();
-            return e.getMessage();
         }
     }
 
-    private static List<String> readFileToList(String filePath) throws Exception {
-        List<String> lines = new ArrayList<>();
-        Files.lines(Paths.get(filePath)).forEach(line -> lines.add(line));
-        return lines;
+    private void readFromFile(FileHandlingInterface fileHandling) throws RemoteException {
+        System.out.println("Content read from file:");
+        System.out.println(fileHandling.read());
+        amountOfReads -= 1;
     }
 
-    public static String getRemoteFileLocation() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(FILE_LOCATION));
-        String line = br.readLine();
-        br.close();
-        return line;
+    private void writeToFile(FileHandlingInterface fileHandling) throws RemoteException {
+        System.out.println("Adding new line to file");
+        System.out.println(fileHandling.write("Written by: " + connectLocation));
+        amountOfWrites -= 1;
     }
+
+    private void deleteFromFile(FileHandlingInterface fileHandling) throws RemoteException {
+        System.out.println("Deleting line from file");
+        System.out.println(fileHandling.delete(1));
+        amountOfDeletes -= 1;
+
+    }
+
+    private void readAmountOfEachOperation(String filePath) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            String line1 = br.readLine(); // Read the first line (we don't need it)
+            String line2 = br.readLine(); // Read the second line
+            br.close();
+
+            // Split the second line into values separated by commas
+            String[] valueStrings = line2.split(",");
+            amountOfReads = Integer.parseInt(valueStrings[0]);
+            amountOfWrites = Integer.parseInt(valueStrings[1]);
+            amountOfDeletes = Integer.parseInt(valueStrings[2]);
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading file: " + e.getMessage());
+        }
+    }
+
 }
