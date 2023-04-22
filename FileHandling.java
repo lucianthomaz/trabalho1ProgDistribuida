@@ -7,15 +7,16 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 
-
-// Classe remota para o exemplo "Hello, world!"
 public class FileHandling extends UnicastRemoteObject implements FileHandlingInterface {
     private static final long serialVersionUID = 7896795898928782846L;
-    public FileHandling () throws RemoteException {}
+    private String server;
 
-    // Implementa o metodo invocavel remotamente, que retorna a mensagem armazenada no objeto
+    public FileHandling (String server) throws RemoteException {
+        this.server = server;
+    }
+
     public String read() throws RemoteException {
-        System.out.println("Reading from file file...");
+        System.out.println("[server " + server + " ] Reading from file file...");
         try {
             return readFileAsString("test");
         } catch (IOException e) {
@@ -25,7 +26,7 @@ public class FileHandling extends UnicastRemoteObject implements FileHandlingInt
     }
 
     public boolean write(String message) {
-        System.out.println("Writing to file...");
+        System.out.println("[server " + server + " ] Writing to file...");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("filename.txt", true))) {
             writer.write(message);
             writer.newLine();
@@ -37,7 +38,7 @@ public class FileHandling extends UnicastRemoteObject implements FileHandlingInt
     }
 
     public boolean delete(int numeroLinha){
-        System.out.println("Deleting from file...");
+        System.out.println("[server " + server + " ] Deleting from file...");
         List<String> linhas = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader("filename.txt"))) {
             Thread.sleep(1000);
