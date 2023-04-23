@@ -25,7 +25,7 @@ public class FileHandling extends UnicastRemoteObject implements FileHandlingInt
         }
     }
 
-    public boolean write(String message) {
+    public boolean write(String message) throws RemoteException {
         System.out.println("[server " + server + " ] Writing to file...");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("filename.txt", true))) {
             writer.write(message);
@@ -37,7 +37,7 @@ public class FileHandling extends UnicastRemoteObject implements FileHandlingInt
         }
     }
 
-    public boolean delete(int numeroLinha){
+    public boolean delete(int numeroLinha) throws RemoteException {
         System.out.println("[server " + server + " ] Deleting from file...");
         List<String> linhas = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader("filename.txt"))) {
