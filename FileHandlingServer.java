@@ -16,7 +16,7 @@ class FileHandlingServer extends UnicastRemoteObject implements FileHandlingInte
 	private static final String SHARED_FILE = "sharedFile.txt";
 	private String serverName;
 	private static final String FILE_LOCATION = "fileLocation.txt";
-	private static final boolean IS_LOCALHOST_TESTING = true;
+	private static final boolean IS_LOCALHOST_TESTING = false;
 	private boolean isMasterServer;
 	private boolean isLocked = false;
 	private FileHandlingInterface remoteServer;
@@ -56,7 +56,7 @@ class FileHandlingServer extends UnicastRemoteObject implements FileHandlingInte
 		System.out.println("[server " + serverName + " ] Reading from file file...");
 		try {
 			Thread.sleep(TIME_TO_LOCK_IN_MILLIS);
-			return IS_LOCALHOST_TESTING ? readFileAsString() : readRemoteFile(serverName, getRemoteFileLocation());
+			return IS_LOCALHOST_TESTING || isMasterServer ? readFileAsString() : readRemoteFile(serverName.split(",")[0], getRemoteFileLocation());
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -142,8 +142,9 @@ class FileHandlingServer extends UnicastRemoteObject implements FileHandlingInte
 	}
 
 	public static String readRemoteFile(String ipAddress, String filePath) throws IOException {
+		System.out.println("Reading from remote machine!!!");
 		// Construct the URL for the remote file
-		String url = "file:////" + ipAddress + "/" + filePath;
+		String url = "file:////" + getSplitMasterAddress().get(0) + "/" + filePath;
 		URL remoteFileUrl = new URL(url);
 
 		// Open a connection to the remote file and create a reader to read its contents

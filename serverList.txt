@@ -1,5 +1,5 @@
-192.168.25.4,2000,true
-192.168.25.19,8080,false
+10.32.162.182,8080,true
+10.32.162.13,8080,false
 localhost,2002,false
 localhost,2003,false
 localhost,2004,false

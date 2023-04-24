@@ -1,26 +1,11 @@
-Written by: rmi://192.168.25.4:2000/FileHandling
-Written by: rmi://192.168.25.4:2000/FileHandling
+Linha 3
+Linha 4
+Linha 5
+Linha 6
+REMOTE_FILE
 
-Written by: rmi://192.168.25.4:2000/FileHandling
-Written by: rmi://192.168.25.4:2000/FileHandling
 
-Written by: rmi://192.168.25.4:2000/FileHandling
-Written by: rmi://192.168.25.4:2000/FileHandling
-Written by: rmi://192.168.25.4:2000/FileHandling
+Written by: rmi://10.32.162.182:8080/FileHandling
 
-Written by: rmi://192.168.25.4:2000/FileHandling
-Written by: rmi://192.168.25.4:2000/FileHandling
-
-Written by: rmi://192.168.25.4:2000/FileHandling
-
-Written by: rmi://192.168.25.4:2000/FileHandling
-
-Written by: rmi://192.168.25.4:2000/FileHandling
-
-Written by: rmi://192.168.25.4:2000/FileHandling
-Written by: rmi://192.168.25.4:2000/FileHandling
-Written by: rmi://192.168.25.4:2000/FileHandling
-
-Written by: rmi://192.168.25.4:2000/FileHandling
-Written by: rmi://192.168.25.4:2000/FileHandling
-Written by: rmi://192.168.25.4:2000/FileHandling
+Written by: rmi://10.32.162.182:8080/FileHandling
+Written by: rmi://10.32.162.182:8080/FileHandling
